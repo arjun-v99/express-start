@@ -1,25 +1,14 @@
 const express = require("express");
 
+const adminRouter = require("./routes/admin");
+const userRouter = require("./routes/user");
 const app = express();
 
-// app.use((req, res, next) => {
-//   console.log("first middleware");
-//   next();
-// });
+// THE KEY LINE: Using Express's built-in URL-encoded parser (Express 4.16.0+)
+// No need for body-parser package!
+app.use(express.urlencoded({ extended: false }));
 
-// app.use((req, res, next) => {
-//   console.log("second middleware");
-//   res.send("<h1>Home page</h1>");
-// });
-
-app.use("/users", (req, res, next) => {
-  console.log("Users routing middleware");
-  res.send("<h2>Users Page</h2>");
-});
-
-app.use("/", (req, res, next) => {
-  console.log("Home Routing Middleware");
-  res.send("<h1>Home Page</h1>");
-});
+app.use(adminRouter.router);
+app.use(userRouter.router);
 
 app.listen(3000);
