@@ -6,7 +6,7 @@ router.get("/add-user", (req, res, next) => {
   res.send(`<html>
     <head><title>Post Example</title></head>
     <body>
-    <form action="/save-user" method="POST">
+    <form action="/admin/save-user" method="POST">
     <div>
     <input type="text" name="username" />
     </div>
