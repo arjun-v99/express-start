@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+.env
+.DS_Store # macOS specific
+npm-debug.log*
+yarn-error.log*
+.npm/
+.eslintcache
+.node_repl_history
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# IDE specific files
+.vscode/ # VS Code specific
+.idea/ # WebStorm/IntelliJ specific
+
+# Other
+pids/
+*.pid
+*.seed
+*.pid.lock
