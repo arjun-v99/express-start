@@ -14,7 +14,13 @@ router.get("/add-product", (req, res, next) => {
   // ../ is go to go up one level in directory
   // views is our folder and last one is our file name
   // we do it like this because different OS have different way of accessing dirs eg: windows - c:\users\html linux- /usr/bin/lib... etc
-  res.sendFile(path.join(rootDir, "views", "add-product.html"));
+  // res.sendFile(path.join(rootDir, "views", "add-product.html"));
+
+  // Using Pug to render our new template
+  res.render("add-product", {
+    title: "Add Product",
+    path: "/admin/add-product",
+  });
 });
 
 router.post("/save-product", (req, res, next) => {
