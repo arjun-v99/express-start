@@ -5,23 +5,10 @@ const express = require("express");
 
 const rootDir = require("./util/path");
 
-const adminData = require("./routes/admin");
+const adminRouter = require("./routes/admin");
 const productsRouter = require("./routes/products");
+const errorController = require("./controllers/error");
 const app = express();
-
-// Registering templating engine
-// app.set("view engine", "pug");
-
-// pug was already registered like a built-in. handlebars are not. so we have to set engine explicitly.
-// app.engine(
-//   "hbs",
-//   engine({
-//     extname: "hbs",
-//     defaultLayout: false,
-//     layoutsDir: "views/layouts/",
-//   })
-// );
-// app.set("view engine", "hbs");
 
 app.set("view engine", "ejs");
 
@@ -33,12 +20,10 @@ app.use(express.urlencoded({ extended: false }));
 // to serve static files
 app.use(express.static(path.join(rootDir, "public")));
 
-app.use("/admin", adminData.routes);
+app.use("/admin", adminRouter.routes);
 app.use(productsRouter.router);
 
 // 404 error page
-app.use((req, res, next) => {
-  res.status(404).render("404", { pageTitle: "Page not found" });
-});
+app.use(errorController.urlNotFound);
 
 app.listen(3000);
