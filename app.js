@@ -6,8 +6,9 @@ const express = require("express");
 const rootDir = require("./util/path");
 
 const adminRouter = require("./routes/admin");
-const productsRouter = require("./routes/products");
+const shopRouter = require("./routes/shop");
 const errorController = require("./controllers/error");
+
 const app = express();
 
 app.set("view engine", "ejs");
@@ -21,7 +22,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, "public")));
 
 app.use("/admin", adminRouter.routes);
-app.use(productsRouter.router);
+app.use(shopRouter.router);
 
 // 404 error page
 app.use(errorController.urlNotFound);
