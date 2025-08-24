@@ -41,3 +41,14 @@ exports.getCheckout = (req, res, next) => {
     path: "/checkout",
   });
 };
+
+exports.getProductDetail = (req, res, next) => {
+  const prodId = req.params.productId;
+  Product.getById(prodId, (prod) => {
+    res.render("shop/product-detail", {
+      product: prod,
+      pageTitle: "Products Detail",
+      path: "/products/detail",
+    });
+  });
+};

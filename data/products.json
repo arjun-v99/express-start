@@ -1,8 +1,1 @@
-[
-  {
-    "title": "Book",
-    "productImg": "https://picsum.photos/id/20/3670/2462",
-    "price": "2000",
-    "description": "Lorem ipsum"
-  }
-]
+[{"id":"12345","title":"Book","productImg":"https://picsum.photos/id/20/3670/2462","price":"2000","description":"Lorem ipsum"},{"title":"Book","productImg":"https://thetimberguy.com/cdn/shop/products/Buy-Compact-Wooden-Dining-table-with-1-Bench-3-chairs-furniture-set-for-modern-Home_1200x.jpg","price":"20","description":"Lorem Ipsum","id":"0.6582530846340768"},{"title":"Table","productImg":"https://www.rubcogroup.com/wp-content/uploads/2023/06/Dining-Table-Round-with-Empire-Leg-3.jpg","price":"2000","description":"Lorem ipsum dolor sit amet","id":"0.398442253720348"}]

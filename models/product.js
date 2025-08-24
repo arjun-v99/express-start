@@ -24,6 +24,7 @@ module.exports = class Product {
   }
 
   save() {
+    this.id = Math.random().toString();
     getProductsFromFile((products) => {
       products.push(this);
       //   Converting the js obj back to json string to store in the file
@@ -36,5 +37,13 @@ module.exports = class Product {
   //   using static method to return all products without the need to create a new object from this class.
   static fetchAll(cb) {
     getProductsFromFile(cb);
+  }
+
+  static getById(id, cb) {
+    getProductsFromFile((products) => {
+      const getProd = products.find((p) => p.id === id);
+
+      cb(getProd);
+    });
   }
 };
