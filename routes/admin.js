@@ -1,28 +1,19 @@
 const express = require("express");
 
+const adminController = require("../controllers/admin");
+
 const router = express.Router();
 
-const products = [];
+router.get("/add-product", adminController.addProduct);
 
-router.get("/add-product", (req, res, next) => {
-  // path module is required to get the absolute path according to the OS.
-  // __dirname is used to get current directory, like where the script executed
-  // ../ is go to go up one level in directory
-  // views is our folder and last one is our file name
-  // we do it like this because different OS have different way of accessing dirs eg: windows - c:\users\html linux- /usr/bin/lib... etc
-  // res.sendFile(path.join(rootDir, "views", "add-product.html"));
+router.post("/save-product", adminController.saveProduct);
 
-  // Using Pug to render our new template
-  res.render("add-product", {
-    pageTitle: "Add Product",
-    path: "/admin/add-product",
-  });
-});
+router.get("/products", adminController.listProductsForAdmin);
 
-router.post("/save-product", (req, res, next) => {
-  products.push({ title: req.body.title });
-  res.redirect("/");
-});
+router.get("/edit-product/:productId", adminController.getEditProduct);
+
+router.post("/edit-product", adminController.postEditProduct);
+
+router.post("/delete-product", adminController.postDeleteProduct);
 
 exports.routes = router;
-exports.products = products;
