@@ -19,8 +19,12 @@ exports.saveProduct = (req, res, next) => {
     req.body.description
   );
   // calling the save method to push the data to the global array
-  prod.save();
-  res.redirect("/");
+  prod
+    .save()
+    .then(() => {
+      res.redirect("/");
+    })
+    .catch((err) => console.error(err));
 };
 
 exports.listProductsForAdmin = (req, res, next) => {

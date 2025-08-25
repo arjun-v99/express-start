@@ -4,6 +4,7 @@ const express = require("express");
 // const { engine } = require("express-handlebars");
 
 const rootDir = require("./util/path");
+const db = require("./util/databse");
 
 const adminRouter = require("./routes/admin");
 const shopRouter = require("./routes/shop");
