@@ -3,10 +3,10 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 exports.listProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([result, metaData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/products-list", {
-        prods: result,
+        prods: products,
         pageTitle: "Products List",
         path: "/products",
       });
@@ -15,12 +15,12 @@ exports.listProducts = (req, res, next) => {
 };
 
 exports.getHome = (req, res, next) => {
-  Product.fetchAll()
-    .then(([result, metaData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/index", {
-        prods: result,
+        prods: products,
         pageTitle: "Home",
-        path: "/products",
+        path: "/",
       });
     })
     .catch((err) => console.error(err));
@@ -79,11 +79,12 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getProductDetail = (req, res, next) => {
   const prodId = req.params.productId;
-  Product.getById(prodId)
-    .then(([result]) => {
+
+  Product.findByPk(prodId)
+    .then((product) => {
       res.render("shop/product-detail", {
-        product: result[0],
-        pageTitle: result[0].title + " Detail",
+        product: product,
+        pageTitle: product.title + " Detail",
         path: "/products",
       });
     })
