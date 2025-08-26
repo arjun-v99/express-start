@@ -1,32 +1,26 @@
-const db = require("../util/databse");
+const Sequelize = require("sequelize");
 
-const Cart = require("../models/cart");
+const sequelize = require("../util/databse");
 
-module.exports = class Product {
-  constructor(id, title, productImg, price, description) {
-    this.id = id;
-    this.title = title;
-    this.productImg = productImg;
-    this.price = price;
-    this.description = description;
-  }
+const Product = sequelize.define("product", {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
+  },
+  title: Sequelize.STRING,
+  price: {
+    allowNull: false,
+    type: Sequelize.DOUBLE,
+  },
+  imageUrl: {
+    allowNull: false,
+    type: Sequelize.STRING,
+  },
+  description: {
+    type: Sequelize.TEXT,
+  },
+});
 
-  save() {
-    // execute returns a Promise so that we can use .then and .catch
-    return db.execute(
-      "INSERT INTO products (title, image_url, price, description) VALUES (?, ?, ?, ?)",
-      [this.title, this.productImg, this.price, this.description]
-    );
-  }
-
-  //   using static method to return all products without the need to create a new object from this class.
-  static fetchAll() {
-    return db.execute("SELECT * FROM products");
-  }
-
-  static getById(id) {
-    return db.execute("SELECT * FROM products WHERE product_id = ?", [id]);
-  }
-
-  static deleteById(id) {}
-};
+module.exports = Product;

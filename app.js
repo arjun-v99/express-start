@@ -4,7 +4,7 @@ const express = require("express");
 // const { engine } = require("express-handlebars");
 
 const rootDir = require("./util/path");
-const db = require("./util/databse");
+const sequelize = require("./util/databse");
 
 const adminRouter = require("./routes/admin");
 const shopRouter = require("./routes/shop");
@@ -28,4 +28,10 @@ app.use(shopRouter.router);
 // 404 error page
 app.use(errorController.urlNotFound);
 
-app.listen(3000);
+// used to check if models defined their tables properly
+sequelize
+  .sync()
+  .then((result) => {
+    app.listen(3000);
+  })
+  .catch((err) => console.error(err));
