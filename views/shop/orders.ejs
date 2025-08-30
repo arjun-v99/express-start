@@ -7,5 +7,24 @@
         <%- include('../includes/nav.ejs') %>
             <main>
                 <h1>Orders</h1>
+                <% if(orders.length> 0) { %>
+                    <ul>
+                        <% orders.forEach(order=> { %>
+                            <li>
+                                <h1># <%=order.id %>
+                                </h1>
+                            </li>
+                            <ul>
+                                <% order.products.forEach(product=> { %>
+                                    <li>
+                                        <%= product.title %>(Quantity : <%= product.orderItem.quantity %>)
+                                    </li>
+                                    <% }); %>
+                            </ul>
+                            <% }) %>
+                    </ul>
+                    <% } else{ %>
+                        <h2>You haven't made any orders yet!!</h2>
+                        <% } %>
             </main>
             <%- include('../includes/footer.ejs') %>
