@@ -14,19 +14,22 @@ exports.saveProduct = (req, res, next) => {
   const imgUrl = req.body.productImg;
   const price = req.body.price;
   const description = req.body.description;
-
-  Product.create({
-    title: title,
-    price: price,
-    imageUrl: imgUrl,
-    description: description,
-  })
+  // Sequelize added this method to the User object because we defined Relations/Associations for the User Model
+  // So this will create the product with the userId without the need to explicitly defining it
+  req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageUrl: imgUrl,
+      description: description,
+    })
     .then((result) => res.redirect("/admin/products"))
     .catch((err) => console.error(err));
 };
 
 exports.listProductsForAdmin = (req, res, next) => {
-  Product.findAll()
+  req.user
+    .getProducts()
     .then((products) => {
       res.render("admin/list-products", {
         prods: products,
@@ -43,8 +46,10 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  Product.findByPk(prodId)
-    .then((product) => {
+  req.user
+    .getProducts({ where: { id: prodId } })
+    .then((products) => {
+      const product = products[0];
       if (!product) {
         return res.redirect("/");
       }
