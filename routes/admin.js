@@ -8,12 +8,12 @@ router.get("/add-product", adminController.addProduct);
 
 router.post("/save-product", adminController.saveProduct);
 
-router.get("/products", adminController.listProductsForAdmin);
+// router.get("/products", adminController.listProductsForAdmin);
 
-router.get("/edit-product/:productId", adminController.getEditProduct);
+// router.get("/edit-product/:productId", adminController.getEditProduct);
 
-router.post("/edit-product", adminController.postEditProduct);
+// router.post("/edit-product", adminController.postEditProduct);
 
-router.post("/delete-product", adminController.postDeleteProduct);
+// router.post("/delete-product", adminController.postDeleteProduct);
 
 exports.routes = router;
