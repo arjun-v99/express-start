@@ -8,7 +8,7 @@ const express = require("express");
 const rootDir = require("./util/path");
 
 const adminRouter = require("./routes/admin");
-// const shopRouter = require("./routes/shop");
+const shopRouter = require("./routes/shop");
 
 const mongoConnect = require("./util/databse").mongoConnect;
 const errorController = require("./controllers/error");
@@ -40,12 +40,12 @@ app.use((req, res, next) => {
 });
 
 app.use("/admin", adminRouter.routes);
-// app.use(shopRouter.router);
+app.use(shopRouter.router);
 
 // 404 error page
 app.use(errorController.urlNotFound);
 
 mongoConnect((client) => {
-  console.log(client);
+  // console.log(client);
   app.listen(3000);
 });
