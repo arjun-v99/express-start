@@ -45,48 +45,15 @@ exports.getHome = (req, res, next) => {
 //     .catch((err) => console.error(err));
 // };
 
-// exports.addToCart = (req, res, next) => {
-//   const productId = req.body.productId;
-//   // to make cart locally accessible
-//   let fetchedCart;
-//   let newQuantity = 1;
-//   req.user
-//     .getCart()
-//     .then((cart) => {
-//       fetchedCart = cart;
-//       return cart.getProducts({
-//         where: {
-//           id: productId,
-//         },
-//       });
-//     })
-//     .then((products) => {
-//       let product;
-//       if (products.length > 0) {
-//         product = products[0];
-//       }
-
-//       if (product) {
-//         // For products already inside the cart
-//         const currentQty = product.cartItem.quantity;
-//         newQuantity = currentQty + 1;
-//         // returning the product promise that we got from sequelize
-//         return product;
-//       }
-//       // For new products adding too the cart
-//       // Returning the product if already not found in cart
-//       return Product.findByPk(productId);
-//     })
-//     .then((product) => {
-//       return fetchedCart.addProduct(product, {
-//         through: { quantity: newQuantity },
-//       });
-//     })
-//     .then(() => {
-//       res.redirect("/cart");
-//     })
-//     .catch((err) => console.error(err));
-// };
+exports.addToCart = (req, res, next) => {
+  const productId = req.body.productId;
+  Product.fetchById(productId)
+    .then((product) => {
+      return req.user.addToCart(product);
+    })
+    .then((result) => res.redirect("/"))
+    .catch((err) => console.error(err));
+};
 
 // exports.postCartDeleteProduct = (req, res, next) => {
 //   const prodId = req.body.productId;
