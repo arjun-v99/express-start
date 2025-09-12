@@ -1,4 +1,5 @@
 // Importing ObjectId from mongo
+const { name } = require("ejs");
 const { ObjectId } = require("mongodb");
 
 const getDb = require("../util/databse").getDb;
@@ -78,6 +79,86 @@ class User {
         $set: { cart: updatedCart },
       }
     );
+  }
+
+  getCart() {
+    const db = getDb();
+    // Creating an array product Ids
+    const productIds = this.cart.items.map((i) => i.productId);
+
+    // with the help of $in operator we are finding all products with the productId inside the array.
+    return db
+      .collection("products")
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then((products) => {
+        // Check if all product ids from cart exist in products list
+        // const allExist = productIds.every((pId) =>
+        //   products.some((product) => product._id === pId)
+        // );
+        // If not all products from cart are not found in products list we are resetting cart
+        // if (allExist === false) {
+        //   this.cart.items = [];
+        // }
+        // we need to add the quantity back to the result we got from db.
+        return products.map((p) => {
+          // returning an obj with all properties of product and finding quantity from the cart items
+          return {
+            ...p,
+            quantity: this.cart.items.find((i) => {
+              return i.productId.toString() === p._id.toString();
+            }).quantity,
+          };
+        });
+      });
+  }
+
+  deleteItemFromCart(productId) {
+    const updatedCartItems = this.cart.items.filter(
+      (p) => p.productId.toString() !== productId.toString()
+    );
+    const db = getDb();
+    return db.collection("users").updateOne(
+      {
+        _id: this._id,
+      },
+      {
+        // this will set the cart object to our user document
+        $set: { cart: { items: updatedCartItems } },
+      }
+    );
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        // Storing the products and quantity from the cart
+        const order = {
+          items: products,
+          user: {
+            _id: this._id,
+            username: this.username,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then((result) => {
+        // emptying cart instance after placing order
+        this.cart = { items: [] };
+        // emptying cart in db after placing order
+        return db.collection("users").updateOne(
+          {
+            _id: this._id,
+          },
+          { $set: { cart: { items: [] } } }
+        );
+      });
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db.collection("orders").find({ "user._id": this._id }).toArray();
   }
 }
 
