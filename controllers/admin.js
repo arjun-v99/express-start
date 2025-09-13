@@ -14,25 +14,25 @@ exports.saveProduct = (req, res, next) => {
   const imgUrl = req.body.productImg;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(
-    title,
-    price,
-    imgUrl,
-    description,
-    null,
-    req.user._id
-  );
+  // we can create a Obj instance here becuase we are exporting a model from mongoose
+  // constructor value is value with structure we defined in the product schema.
+  const product = new Product({
+    title: title,
+    price: price,
+    imageUrl: imgUrl,
+    description: description,
+  });
   product
     .save()
     .then((result) => {
-      console.log(result);
+      console.log("product Saved");
       res.redirect("/admin/products");
     })
     .catch((err) => console.error(err));
 };
 
 exports.listProductsForAdmin = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("admin/list-products", {
         prods: products,
@@ -50,7 +50,7 @@ exports.getEditProduct = (req, res, next) => {
   }
   const prodId = req.params.productId;
 
-  Product.fetchById(prodId)
+  Product.findById(prodId)
     .then((product) => {
       if (!product) {
         return res.redirect("/");
@@ -72,16 +72,15 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.productImg;
   const updatedDesc = req.body.description;
-  const updatedProduct = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedImageUrl,
-    updatedDesc,
-    prodId
-  );
 
-  updatedProduct
-    .save()
+  Product.findById(prodId)
+    .then((product) => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.imageUrl = updatedImageUrl;
+      product.description = updatedDesc;
+      product.save();
+    })
     .then((result) => {
       // we have to move the redirect here so that the views loads correctly with the updated data.
       // if we placed it outside the promise, it will execute synchronously therefore not getting the latest data
@@ -93,7 +92,7 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.deleteById(prodId)
+  Product.findByIdAndDelete(prodId)
     .then((result) => {
       res.redirect("/admin/products");
     })
