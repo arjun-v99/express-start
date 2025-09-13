@@ -92,14 +92,26 @@ class User {
       .find({ _id: { $in: productIds } })
       .toArray()
       .then((products) => {
-        // Check if all product ids from cart exist in products list
-        // const allExist = productIds.every((pId) =>
-        //   products.some((product) => product._id === pId)
-        // );
-        // If not all products from cart are not found in products list we are resetting cart
-        // if (allExist === false) {
-        //   this.cart.items = [];
-        // }
+        // Removing cart items if cart items not found in products List
+        this.cart.items = this.cart.items.filter((item) =>
+          products.some(
+            (product) => product._id.toString() === item.productId.toString()
+          )
+        );
+        // Removing cart items from users collection if cart items not found in products List
+        const updatedCart = {
+          items: this.cart.items,
+        };
+        db.collection("users").updateOne(
+          {
+            _id: this._id,
+          },
+          {
+            // this will set the cart object to our user document
+            $set: { cart: updatedCart },
+          }
+        );
+
         // we need to add the quantity back to the result we got from db.
         return products.map((p) => {
           // returning an obj with all properties of product and finding quantity from the cart items
