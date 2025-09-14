@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const Product = require("../models/product");
+
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -14,12 +16,81 @@ const userSchema = new Schema({
   cart: {
     items: [
       {
-        productId: { type: Schema.Types.ObjectId, required: true },
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
         quantity: { type: Number, required: true },
       },
     ],
   },
 });
+
+// In this method `this` will refer to the item that called this method.
+userSchema.methods.addToCart = function (product) {
+  const cartProductIndex = this.cart.items.findIndex(
+    (cp) => cp.productId.toString() === product._id.toString()
+  );
+  // creating a copy of cart items
+  const updatedCartItems = [...this.cart.items];
+  let newQuantity = 1;
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({ productId: product._id, quantity: newQuantity });
+  }
+  const updatedCart = {
+    items: updatedCartItems,
+  };
+  this.cart = updatedCart;
+
+  return this.save();
+};
+
+// TODO: check if product in cart is deleted from products list by admin before loading the cart items
+// TODO: this method works. see how we can implement it in getCart method used now.
+userSchema.methods.getCart = function (user) {
+  // Creating an array product Ids
+  const productIds = this.cart.items.map((i) => i.productId);
+
+  // with the help of $in operator we are finding all products with the productId inside the array.
+  return Product.find({ _id: { $in: productIds } }).then((products) => {
+    // Removing cart items if cart items not found in products List
+    this.cart.items = this.cart.items.filter((item) =>
+      products.some(
+        (product) => product._id.toString() === item.productId.toString()
+      )
+    );
+    // Removing cart items from users collection if cart items not found in products List
+    const updatedCart = {
+      items: this.cart.items,
+    };
+    user.cart = updatedCart;
+    user.save();
+
+    // we need to add the quantity back to the result we got from db.
+    return products.map((p) => {
+      // returning an obj with all properties of product and finding quantity from the cart items
+      return {
+        ...p,
+        quantity: this.cart.items.find((i) => {
+          return i.productId.toString() === p._id.toString();
+        }).quantity,
+      };
+    });
+  });
+};
+
+userSchema.methods.removeCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter(
+    (p) => p.productId.toString() !== productId.toString()
+  );
+
+  this.cart.items = updatedCartItems;
+  return this.save();
+};
 
 module.exports = mongoose.model("User", userSchema);
 
