@@ -25,20 +25,19 @@ app.use(express.urlencoded({ extended: false }));
 // to serve static files
 app.use(express.static(path.join(rootDir, "public")));
 
-// app.use((req, res, next) => {
-// checking if a user exists by manually giving an _id
-// User.findById("68b6ba3bd850cc76f29fec37")
-//   .then((user) => {
-//     if (user) {
-//       // we are creating new user object to avail its methods in req.user
-//       req.user = new User(user.username, user.email, user.cart, user._id);
-//       // req.user = user;
-//       // To continue to next middlewares i.e, routing middlewares
-// next();
-//     }
-//   })
-//   .catch((err) => console.error(err));
-// });
+app.use((req, res, next) => {
+  // checking if a user exists by manually giving an _id
+  User.findById("68c69eaa6b13bcced7161ad6")
+    .then((user) => {
+      if (user) {
+        //the `user` is a mongoose object so we can perform all mongoose action on req.user
+        req.user = user;
+        // To continue to next middlewares i.e, routing middlewares
+        next();
+      }
+    })
+    .catch((err) => console.error(err));
+});
 
 app.use("/admin", adminRouter.routes);
 app.use(shopRouter.router);
@@ -49,6 +48,19 @@ app.use(errorController.urlNotFound);
 mongoose
   .connect(process.env.MONGODB_URL)
   .then((result) => {
+    // Create a user if it does not exists
+    User.findOne().then((result) => {
+      if (!result) {
+        const user = new User({
+          name: "John Doe",
+          email: "john.doe@test.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
     app.listen(3000);
   })
   .catch((err) => console.error(err));

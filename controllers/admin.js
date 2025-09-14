@@ -21,6 +21,7 @@ exports.saveProduct = (req, res, next) => {
     price: price,
     imageUrl: imgUrl,
     description: description,
+    userId: req.user._id,
   });
   product
     .save()
@@ -33,6 +34,8 @@ exports.saveProduct = (req, res, next) => {
 
 exports.listProductsForAdmin = (req, res, next) => {
   Product.find()
+    // .select("title price -_id")          we can use select() for selecting only required properties from our document. adding - before the property name will not select the property.
+    // .populate("userId")                  we can populate the userId with users details. we can also use a second parameter for specifying which properties should it select from the document.
     .then((products) => {
       res.render("admin/list-products", {
         prods: products,

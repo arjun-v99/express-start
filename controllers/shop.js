@@ -26,9 +26,11 @@ exports.getHome = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
+  // we are getting the user record and populating productIds with product data
   req.user
-    .getCart()
-    .then((products) => {
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items;
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
@@ -40,7 +42,7 @@ exports.getCart = (req, res, next) => {
 
 exports.addToCart = (req, res, next) => {
   const productId = req.body.productId;
-  Product.fetchById(productId)
+  Product.findById(productId)
     .then((product) => {
       return req.user.addToCart(product);
     })
@@ -51,7 +53,7 @@ exports.addToCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
-    .deleteItemFromCart(prodId)
+    .removeCart(prodId)
     .then((products) => {
       res.redirect("/cart");
     })
