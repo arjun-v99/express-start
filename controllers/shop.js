@@ -3,30 +3,38 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.listProducts = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   Product.find()
     .then((products) => {
       res.render("shop/products-list", {
         prods: products,
         pageTitle: "Products List",
         path: "/products",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
 };
 
 exports.getHome = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Home",
         path: "/",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
 };
 
 exports.getCart = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   // we are getting the user record and populating productIds with product data
   req.user
     .populate("cart.items.productId")
@@ -36,6 +44,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -62,6 +71,8 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       console.log(orders[0].products);
@@ -69,12 +80,15 @@ exports.getOrders = (req, res, next) => {
         pageTitle: "Orders",
         path: "/orders",
         orders: orders,
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getProductDetail = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   const prodId = req.params.productId;
 
   Product.findById(prodId)
@@ -83,6 +97,7 @@ exports.getProductDetail = (req, res, next) => {
         product: product,
         pageTitle: product.title + " Detail",
         path: "/products",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));

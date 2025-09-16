@@ -2,10 +2,13 @@
 const Product = require("../models/product");
 
 exports.addProduct = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    isLoggedIn: isLoggedIn,
   });
 };
 
@@ -33,6 +36,8 @@ exports.saveProduct = (req, res, next) => {
 };
 
 exports.listProductsForAdmin = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   Product.find()
     // .select("title price -_id")          we can use select() for selecting only required properties from our document. adding - before the property name will not select the property.
     // .populate("userId")                  we can populate the userId with users details. we can also use a second parameter for specifying which properties should it select from the document.
@@ -41,12 +46,15 @@ exports.listProductsForAdmin = (req, res, next) => {
         prods: products,
         pageTitle: "Products List | Admin",
         path: "/admin/products",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
+  const cookie = req.get("Cookie");
+  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -63,6 +71,7 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
