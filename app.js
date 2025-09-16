@@ -4,11 +4,13 @@ const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
+const session = require("express-session");
 
 const rootDir = require("./util/path");
 
 const adminRouter = require("./routes/admin");
 const shopRouter = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -24,6 +26,10 @@ app.set("views", "views");
 app.use(express.urlencoded({ extended: false }));
 // to serve static files
 app.use(express.static(path.join(rootDir, "public")));
+// initialising session middleware
+app.use(
+  session({ secret: "my secret", resave: false, saveUninitialized: false })
+);
 
 app.use((req, res, next) => {
   // checking if a user exists by manually giving an _id
@@ -41,6 +47,7 @@ app.use((req, res, next) => {
 
 app.use("/admin", adminRouter.routes);
 app.use(shopRouter.router);
+app.use(authRoutes.routes);
 
 // 404 error page
 app.use(errorController.urlNotFound);
