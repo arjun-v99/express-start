@@ -1,5 +1,6 @@
 // product model
 const Product = require("../models/product");
+const Order = require("../models/order");
 
 exports.listProducts = (req, res, next) => {
   Product.find()
@@ -61,9 +62,9 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
+      console.log(orders[0].products);
       res.render("shop/orders", {
         pageTitle: "Orders",
         path: "/orders",
@@ -89,8 +90,29 @@ exports.getProductDetail = (req, res, next) => {
 
 exports.createOrder = (req, res, next) => {
   req.user
-    .addOrder()
-    .then((result) => {
+    .populate("cart.items.productId")
+    .then((user) => {
+      // Product details will be inside productId property. so we are extracting details from that property.
+      const products = user.cart.items.map((i) => {
+        // in product property if we only used i.productId it will only pull out the id.
+        // So we use a property provided my mongoose to get only the data without the metadata
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
+      });
+
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user,
+        },
+        products: products,
+      });
+
+      return order.save();
+    })
+    .then(() => {
+      return req.user.clearCart();
+    })
+    .then(() => {
       res.redirect("/orders");
     })
     .catch((err) => console.error(err));
