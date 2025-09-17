@@ -3,8 +3,7 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.listProducts = (req, res, next) => {
-  const cookie = req.get("Cookie");
-  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
+  const isLoggedIn = req.session.isLoggedIn;
   Product.find()
     .then((products) => {
       res.render("shop/products-list", {
@@ -18,8 +17,7 @@ exports.listProducts = (req, res, next) => {
 };
 
 exports.getHome = (req, res, next) => {
-  const cookie = req.get("Cookie");
-  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
+  const isLoggedIn = req.session.isLoggedIn;
   Product.find()
     .then((products) => {
       res.render("shop/index", {
@@ -33,8 +31,7 @@ exports.getHome = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  const cookie = req.get("Cookie");
-  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
+  const isLoggedIn = req.session.isLoggedIn;
   // we are getting the user record and populating productIds with product data
   req.user
     .populate("cart.items.productId")
@@ -71,8 +68,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  const cookie = req.get("Cookie");
-  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
+  const isLoggedIn = req.session.isLoggedIn;
   Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       console.log(orders[0].products);
@@ -87,8 +83,7 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.getProductDetail = (req, res, next) => {
-  const cookie = req.get("Cookie");
-  const isLoggedIn = cookie ? cookie.split("=")[1] : false;
+  const isLoggedIn = req.session.isLoggedIn;
   const prodId = req.params.productId;
 
   Product.findById(prodId)
