@@ -5,6 +5,7 @@ const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
 
 const rootDir = require("./util/path");
 
@@ -16,6 +17,10 @@ const errorController = require("./controllers/error");
 const User = require("./models/user");
 
 const app = express();
+const store = new MongoDBStore({
+  uri: process.env.MONGODB_URL,
+  collection: "sessions",
+});
 
 app.set("view engine", "ejs");
 
@@ -28,17 +33,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, "public")));
 // initialising session middleware
 app.use(
-  session({ secret: "my secret", resave: false, saveUninitialized: false })
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
 );
 
 app.use((req, res, next) => {
-  // checking if a user exists by manually giving an _id
-  User.findById("68c69eaa6b13bcced7161ad6")
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
     .then((user) => {
       if (user) {
         //the `user` is a mongoose object so we can perform all mongoose action on req.user
         req.user = user;
-        // To continue to next middlewares i.e, routing middlewares
         next();
       }
     })
