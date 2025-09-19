@@ -7,7 +7,6 @@ exports.addProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
-    isLoggedIn: isLoggedIn,
   });
 };
 

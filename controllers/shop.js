@@ -10,7 +10,6 @@ exports.listProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Products List",
         path: "/products",
-        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -24,7 +23,6 @@ exports.getHome = (req, res, next) => {
         prods: products,
         pageTitle: "Home",
         path: "/",
-        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -41,7 +39,6 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -76,7 +73,6 @@ exports.getOrders = (req, res, next) => {
         pageTitle: "Orders",
         path: "/orders",
         orders: orders,
-        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -92,7 +88,6 @@ exports.getProductDetail = (req, res, next) => {
         product: product,
         pageTitle: product.title + " Detail",
         path: "/products",
-        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -111,7 +106,7 @@ exports.createOrder = (req, res, next) => {
 
       const order = new Order({
         user: {
-          name: req.user.name,
+          email: req.user.email,
           userId: req.user,
         },
         products: products,
