@@ -1,13 +1,27 @@
 const bcrypt = require("bcryptjs");
+const { MailtrapClient } = require("mailtrap");
+
+const TOKEN = process.env.MAILTRAP_TOKEN;
 
 const User = require("../models/user");
 
+const client = new MailtrapClient({
+  token: TOKEN,
+  sandbox: true,
+  testInboxId: 4047137,
+});
+
 exports.getLogin = (req, res, next) => {
-  const isLoggedIn = req.session.isLoggedIn;
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMsg: req.flash("error"),
+    errorMsg: message,
   });
 };
 
@@ -49,10 +63,16 @@ exports.doLogout = (req, res, next) => {
 };
 
 exports.getSignup = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    isLoggedIn: false,
+    errorMsg: message,
   });
 };
 
@@ -63,7 +83,8 @@ exports.signUp = (req, res, next) => {
   User.findOne({ email: email })
     .then((result) => {
       if (result) {
-        res.redirect("/signup");
+        req.flash("error", "User already exists");
+        return res.redirect("/signup");
       }
       return bcrypt
         .hash(password, 12)
@@ -78,6 +99,30 @@ exports.signUp = (req, res, next) => {
         })
         .then(() => {
           res.redirect("/login");
+
+          const sender = {
+            email: "hello@example.com",
+            name: "Mailtrap Test",
+          };
+          const recipients = [
+            {
+              email: "arjun46rv@gmail.com",
+            },
+          ];
+
+          // Send Email
+          return client
+            .send({
+              from: sender,
+              to: recipients,
+              subject: "Welcom to Express Start",
+              text: "Enjoy our services. Don't hesitate to keep in touch with us for your feedback",
+              category: "Integration Test",
+            })
+            .catch((err) => console.error(err));
+        })
+        .catch((err) => {
+          console.error(err);
         });
     })
 
