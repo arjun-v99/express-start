@@ -31,9 +31,11 @@
     "express": "^5.1.0",
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.2",
+    "mailtrap": "^4.2.0",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "mysql2": "^3.14.3",
+    "nodemailer": "^6.10.1",
     "pug": "^3.0.3",
     "sequelize": "^6.37.7"
   }
