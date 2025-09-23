@@ -25,6 +25,8 @@ const userSchema = new Schema({
       },
     ],
   },
+  resetPwdToken: String,
+  resetTokenExpiry: Date,
 });
 
 // In this method `this` will refer to the item that called this method.
