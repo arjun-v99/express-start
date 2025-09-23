@@ -7,23 +7,18 @@
   <%- include('../includes/nav.ejs') %>
 
   <main>
-    <form class="login-form" action="/login" method="POST">
+    <form class="login-form" action="/update-new-password" method="POST">
       <div class="form-control">
-        <label for="email">E-Mail</label>
-        <input type="email" name="email" id="email">
-      </div>
-      <div class="form-control">
-        <label for="password">Password</label>
+        <label for="password">New Password</label>
         <input type="password" name="password" id="password">
       </div>
+      <input type="hidden" name="userId" value="<%= userId %>">
+      <input type="hidden" name="pwdToken" value="<%= pwdToken %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <% if(errorMsg) { %>
       <p class="error-message"><%= errorMsg %></p>
       <% } %>
-      <button class="btn" type="submit">Login</button>
-      <div class="centered">
-        <a href="/reset-password">Reset Password</a>
-      </div>
+      <button class="btn" type="submit">Update Password</button>
     </form>
   </main>
   <%- include('../includes/footer.ejs') %>
