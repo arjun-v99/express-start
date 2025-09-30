@@ -219,6 +219,8 @@ exports.setNewPassword = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
+      req.flash("error", "Bad Request");
+      res.redirect("/reset-password");
     });
 };
 
