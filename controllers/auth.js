@@ -2,11 +2,11 @@ const crypto = require("crypto");
 
 const bcrypt = require("bcryptjs");
 const { MailtrapClient } = require("mailtrap");
+const { validationResult } = require("express-validator");
 
 const TOKEN = process.env.MAILTRAP_TOKEN;
 
 const User = require("../models/user");
-const user = require("../models/user");
 
 const client = new MailtrapClient({
   token: TOKEN,
@@ -35,18 +35,44 @@ exports.getLogin = (req, res, next) => {
     path: "/login",
     pageTitle: "Login",
     errorMsg: message,
+    validationErrors: {},
   });
 };
 
 exports.doLogin = (req, res, next) => {
+  const validationErrors = validationResult(req);
+
   const email = req.body.email;
   const password = req.body.password;
+
+  const errors = validationErrors.array();
+  const mappedErrors = {};
+
+  if (!validationErrors.isEmpty()) {
+    errors.forEach((err) => {
+      mappedErrors[err.path] = err.msg;
+    });
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login",
+      oldInput: { email: email, password: password },
+      validationErrors: mappedErrors,
+    });
+  }
   // checking if a user exists by manually giving an _id
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Invalid email or password");
-        res.redirect("/login");
+        // If email is invalid do not give out which field is invalid. so we are setting errors to both fields.
+        mappedErrors.email = "Invalid username or password";
+        mappedErrors.password = "Invalid username or password";
+
+        return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "Login",
+          oldInput: { email: email, password: password },
+          validationErrors: mappedErrors,
+        });
       }
       bcrypt
         .compare(password, user.password)
@@ -60,8 +86,16 @@ exports.doLogin = (req, res, next) => {
               res.redirect("/");
             });
           }
-          req.flash("error", "Invalid email or password");
-          res.redirect("/login");
+          // If password is invalid do not give out which field is invalid. so we are setting errors to both fields.
+          mappedErrors.email = "Invalid username or password";
+          mappedErrors.password = "Invalid username or password";
+
+          return res.status(422).render("auth/login", {
+            path: "/login",
+            pageTitle: "Login",
+            oldInput: { email: email, password: password },
+            validationErrors: mappedErrors,
+          });
         })
         .catch((err) => console.error(err));
     })
@@ -86,50 +120,64 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMsg: message,
+    validationErrors: {},
   });
 };
 
 exports.signUp = (req, res, next) => {
+  const validationErrors = validationResult(req);
+
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
-  User.findOne({ email: email })
-    .then((result) => {
-      if (result) {
-        req.flash("error", "User already exists");
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPwd) => {
-          const user = new User({
-            email: email,
-            password: hashedPwd,
-            cart: { items: [] },
-          });
 
-          return user.save();
-        })
-        .then(() => {
-          res.redirect("/login");
+  if (!validationErrors.isEmpty()) {
+    const errors = validationErrors.array();
+    const mappedErrors = {};
 
-          // Send Email
-          return client
-            .send({
-              from: SENDER,
-              to: RECIPIENTS,
-              subject: "Welcom to Express Start",
-              text: "Enjoy our services. Don't hesitate to keep in touch with us for your feedback",
-              category: "Integration Test",
-            })
-            .catch((err) => console.error(err));
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    errors.forEach((err) => {
+      mappedErrors[err.path] = err.msg;
+    });
+
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+      },
+      validationErrors: mappedErrors,
+    });
+  }
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPwd) => {
+      const user = new User({
+        email: email,
+        password: hashedPwd,
+        cart: { items: [] },
+      });
+
+      return user.save();
     })
+    .then(() => {
+      res.redirect("/login");
 
-    .catch((err) => console.error(err));
+      // Send Email
+      return client
+        .send({
+          from: SENDER,
+          to: RECIPIENTS,
+          subject: "Welcom to Express Start",
+          text: "Enjoy our services. Don't hesitate to keep in touch with us for your feedback",
+          category: "Integration Test",
+        })
+        .catch((err) => console.error(err));
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 exports.getResetPwd = (req, res, next) => {
