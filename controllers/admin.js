@@ -35,7 +35,7 @@ exports.saveProduct = (req, res, next) => {
 
 exports.listProductsForAdmin = (req, res, next) => {
   const isLoggedIn = req.session.isLoggedIn;
-  Product.find()
+  Product.find({ userId: req.user._id })
     // .select("title price -_id")          we can use select() for selecting only required properties from our document. adding - before the property name will not select the property.
     // .populate("userId")                  we can populate the userId with users details. we can also use a second parameter for specifying which properties should it select from the document.
     .then((products) => {
@@ -83,16 +83,18 @@ exports.postEditProduct = (req, res, next) => {
 
   Product.findById(prodId)
     .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        res.redirect("/");
+      }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.imageUrl = updatedImageUrl;
       product.description = updatedDesc;
-      product.save();
-    })
-    .then((result) => {
-      // we have to move the redirect here so that the views loads correctly with the updated data.
-      // if we placed it outside the promise, it will execute synchronously therefore not getting the latest data
-      res.redirect("/admin/products");
+      product.save().then((result) => {
+        // we have to move the redirect here so that the views loads correctly with the updated data.
+        // if we placed it outside the promise, it will execute synchronously therefore not getting the latest data
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => console.error(err));
 };
@@ -100,7 +102,7 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.findByIdAndDelete(prodId)
+  Product.findByIdAndDelete({ _id: prodId, userId: req.user._id })
     .then((result) => {
       res.redirect("/admin/products");
     })

@@ -7,23 +7,45 @@
   <%- include('../includes/nav.ejs') %>
 
   <main>
-    <form class="login-form" action="/signup" method="POST">
+    <form class="login-form" action="/signup" method="POST" novalidate>
       <div class="form-control">
         <label for="email">E-Mail</label>
-        <input type="email" name="email" id="email">
+        <input class="<%= validationErrors.email ? 'invalid' : '' %>" type="email" name="email" id="email" value="<%= locals.oldInput?.email || '' %>">
+        <% if (validationErrors.email) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.email %>
+          </span>
+        </div>
+        <% } %>
       </div>
+
       <div class="form-control">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        <input class="<%= validationErrors.password ? 'invalid' : '' %>" type="password" name="password" id="password" value="<%= locals.oldInput?.password || '' %>">
+        <% if (validationErrors.password) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.password %>
+          </span>
+        </div>
+        <% } %>
       </div>
+
       <div class="form-control">
         <label for="confirmPassword">Confirm Password</label>
-        <input type="password" name="confirmPassword" id="confirmPassword">
+        <input class="<%= validationErrors.confirmPassword ? 'invalid' : '' %>" type="password" name="confirmPassword" id="confirmPassword" value="<%= locals.oldInput?.confirmPassword || '' %>">
+        <% if (validationErrors.confirmPassword) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.confirmPassword %>
+          </span>
+        </div>
+        <% } %>
       </div>
+
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <% if(errorMsg) { %>
-      <p class="error-message"><%= errorMsg %></p>
-      <% } %>
+
       <button class="btn" type="submit">Signup</button>
     </form>
   </main>

@@ -233,7 +233,8 @@ form {
 }
 
 .error-message {
-  color: #e25d68;
+  color: #ce323f;
+  font-size: 0.75rem;
 }
 
 .user-message {

@@ -7,19 +7,33 @@
   <%- include('../includes/nav.ejs') %>
 
   <main>
-    <form class="login-form" action="/login" method="POST">
+    <form class="login-form" action="/login" method="POST" novalidate>
       <div class="form-control">
         <label for="email">E-Mail</label>
-        <input type="email" name="email" id="email">
+        <input class="<%= validationErrors.email ? 'invalid' : '' %>" type="email" name="email" id="email" value="<%= locals.oldInput?.email || '' %>">
+        <% if (validationErrors.email) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.email %>
+          </span>
+        </div>
+        <% } %>
       </div>
+
       <div class="form-control">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        <input class="<%= validationErrors.password ? 'invalid' : '' %>" type="password" name="password" id="password" value="<%= locals.oldInput?.password || '' %>">
+        <% if (validationErrors.password) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.password %>
+          </span>
+        </div>
+        <% } %>
       </div>
+
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <% if(errorMsg) { %>
-      <p class="error-message"><%= errorMsg %></p>
-      <% } %>
+
       <button class="btn" type="submit">Login</button>
       <div class="centered">
         <a href="/reset-password">Reset Password</a>
