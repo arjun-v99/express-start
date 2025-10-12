@@ -9,19 +9,47 @@
     <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>save-product<% } %>" method="POST">
       <div class="form-control">
         <label for="title">Title</label>
-        <input type="text" name="title" id="title" value="<% if (editing) { %><%= product.title %><% } %>">
+        <input type="text" class="<%= validationErrors.title ? 'invalid' : '' %>" name="title" id="title" value="<% if (editing || hasError) { %><%= product.title %><% } %>">
+        <% if (validationErrors.title) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.title %>
+          </span>
+        </div>
+        <% } %>
       </div>
       <div class="form-control">
         <label for="productImg">Image URL</label>
-        <input type="text" name="productImg" id="productImg" value="<% if (editing) { %><%= product.imageUrl %><% } %>">
+        <input type="text" name="productImg" id="productImg" class="<%= validationErrors.productImg ? 'invalid' : '' %>" value="<% if (editing || hasError) { %><%= product.imageUrl %><% } %>">
+        <% if (validationErrors.productImg) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.productImg %>
+          </span>
+        </div>
+        <% } %>
       </div>
       <div class="form-control">
         <label for="price">Price</label>
-        <input type="number" name="price" id="price" step="0.01" value="<% if (editing) { %><%= product.price %><% } %>">
+        <input type="number" name="price" id="price" class="<%= validationErrors.price ? 'invalid' : '' %>" step="0.01" value="<% if (editing || hasError) { %><%= product.price %><% } %>">
+        <% if (validationErrors.price) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.price %>
+          </span>
+        </div>
+        <% } %>
       </div>
       <div class="form-control">
         <label for="description">Description</label>
-        <textarea name="description" id="description" rows="5"><% if (editing) { %><%= product.description %><% } %></textarea>
+        <textarea name="description" id="description" class="<%= validationErrors.description ? 'invalid' : '' %>" rows="5"><% if (editing || hasError) { %><%= product.description %><% } %></textarea>
+        <% if (validationErrors.description) { %>
+        <div class="invalid-feedback">
+          <span class="error-message">
+            <%= validationErrors.description %>
+          </span>
+        </div>
+        <% } %>
       </div>
       <% if (editing) { %>
       <input type="hidden" value="<%= product._id %>" name="productId">
