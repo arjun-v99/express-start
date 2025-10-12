@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 // product model
 const Product = require("../models/product");
 
@@ -7,14 +9,41 @@ exports.addProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    hasError: false,
+    validationErrors: {},
   });
 };
 
 exports.saveProduct = (req, res, next) => {
+  const validationErrors = validationResult(req);
+
   const title = req.body.title;
   const imgUrl = req.body.productImg;
   const price = req.body.price;
   const description = req.body.description;
+
+  const errors = validationErrors.array();
+  const mappedErrors = {};
+
+  if (!validationErrors.isEmpty()) {
+    errors.forEach((err) => {
+      mappedErrors[err.path] = err.msg;
+    });
+    return res.status(422).render("admin/edit-product", {
+      path: "/admin/add-product",
+      pageTitle: "Add Product",
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        imageUrl: imgUrl,
+        price: price,
+        description: description,
+      },
+      validationErrors: mappedErrors,
+    });
+  }
+
   // we can create a Obj instance here becuase we are exporting a model from mongoose
   // constructor value is value with structure we defined in the product schema.
   const product = new Product({
@@ -66,6 +95,8 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
+        hasError: false,
+        validationErrors: {},
         product: product,
         isLoggedIn: isLoggedIn,
       });
@@ -74,12 +105,37 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
+  const validationErrors = validationResult(req);
+
   const prodId = req.body.productId;
 
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.productImg;
   const updatedDesc = req.body.description;
+
+  const errors = validationErrors.array();
+  const mappedErrors = {};
+
+  if (!validationErrors.isEmpty()) {
+    errors.forEach((err) => {
+      mappedErrors[err.path] = err.msg;
+    });
+    return res.status(422).render("admin/edit-product", {
+      path: "/admin/edit-product",
+      pageTitle: "Edit Product",
+      editing: true,
+      hasError: true,
+      product: {
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+        _id: prodId,
+      },
+      validationErrors: mappedErrors,
+    });
+  }
 
   Product.findById(prodId)
     .then((product) => {
