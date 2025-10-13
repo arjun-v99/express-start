@@ -19,9 +19,26 @@ exports.saveProduct = (req, res, next) => {
   const validationErrors = validationResult(req);
 
   const title = req.body.title;
-  const imgUrl = req.body.productImg;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
+
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      path: "/admin/add-product",
+      pageTitle: "Add Product",
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      validationErrors: { productImg: "Invalid file" },
+    });
+  }
+
+  const imageUrl = image.path;
 
   const errors = validationErrors.array();
   const mappedErrors = {};
@@ -37,7 +54,6 @@ exports.saveProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageUrl: imgUrl,
         price: price,
         description: description,
       },
@@ -50,7 +66,7 @@ exports.saveProduct = (req, res, next) => {
   const product = new Product({
     title: title,
     price: price,
-    imageUrl: imgUrl,
+    imageUrl: imageUrl,
     description: description,
     userId: req.user._id,
   });
@@ -124,7 +140,7 @@ exports.postEditProduct = (req, res, next) => {
 
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.productImg;
+  const updatedImage = req.file;
   const updatedDesc = req.body.description;
 
   const errors = validationErrors.array();
@@ -141,7 +157,6 @@ exports.postEditProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc,
         _id: prodId,
@@ -157,7 +172,10 @@ exports.postEditProduct = (req, res, next) => {
       }
       product.title = updatedTitle;
       product.price = updatedPrice;
-      product.imageUrl = updatedImageUrl;
+      // if user uploaded a new image
+      if (updatedImage) {
+        product.imageUrl = updatedImage.path;
+      }
       product.description = updatedDesc;
       product.save().then((result) => {
         // we have to move the redirect here so that the views loads correctly with the updated data.

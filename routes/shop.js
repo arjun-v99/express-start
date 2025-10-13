@@ -21,5 +21,6 @@ router.post(
 
 router.get("/orders", authMiddleware, shopController.getOrders);
 router.post("/create-order", authMiddleware, shopController.createOrder);
+router.get("/orders/:orderId", authMiddleware, shopController.downloadInvoice);
 
 exports.router = router;

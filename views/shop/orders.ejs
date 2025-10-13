@@ -1,30 +1,31 @@
 <%- include('../includes/header.ejs') %>
-    <link rel="stylesheet" href="/css/orders.css">
-    </head>
+<link rel="stylesheet" href="/css/orders.css">
+</head>
 
-    <body>
-        <%- include('../includes/nav.ejs') %>
-            <main>
-                <h1>Orders</h1>
-                <% if(orders.length> 0) { %>
-                    <ul class="orders">
-                        <% orders.forEach(order=> { %>
-                            <li class="orders__item">
-                                <h1>Order - # <%= order._id %>
-                                </h1>
+<body>
+  <%- include('../includes/nav.ejs') %>
+  <main>
+    <h1>Orders</h1>
+    <% if(orders.length> 0) { %>
+    <ul class="orders">
+      <% orders.forEach(order=> { %>
+      <li class="orders__item">
+        <h1>Order - # <%= order._id %>
+        </h1>
 
-                                <ul class="orders__products">
-                                    <% order.products.forEach(p=> { %>
-                                        <li class="orders__products-item">
-                                            <%= p.product.title %>(Quantity : <%= p.quantity %>)
-                                        </li>
-                                        <% }); %>
-                                </ul>
-                            </li>
-                            <% }) %>
-                    </ul>
-                    <% } else{ %>
-                        <h2>You haven't made any orders yet!!</h2>
-                        <% } %>
-            </main>
-            <%- include('../includes/footer.ejs') %>
+        <ul class="orders__products">
+          <% order.products.forEach(p=> { %>
+          <li class="orders__products-item">
+            <%= p.product.title %>(Quantity : <%= p.quantity %>) -
+            <a href="/orders/<%= order._id %>">Download Invoice</a>
+          </li>
+          <% }); %>
+        </ul>
+      </li>
+      <% }) %>
+    </ul>
+    <% } else{ %>
+    <h2>You haven't made any orders yet!!</h2>
+    <% } %>
+  </main>
+  <%- include('../includes/footer.ejs') %>

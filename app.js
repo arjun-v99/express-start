@@ -8,6 +8,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
 
 const rootDir = require("./util/path");
 
@@ -25,15 +26,40 @@ const store = new MongoDBStore({
 });
 const csrfProtection = csrf();
 
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype == "image/png"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
 app.set("view engine", "ejs");
 
 // specifying Where to find the views. second parameter is the directory name
 app.set("views", "views");
 // THE KEY LINE: Using Express's built-in URL-encoded parser (Express 4.16.0+)
-// No need for body-parser package!
 app.use(express.urlencoded({ extended: false }));
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single("productImg")
+);
+
 // to serve static files
 app.use(express.static(path.join(rootDir, "public")));
+app.use("/images", express.static(path.join(rootDir, "images")));
 // initialising session middleware
 app.use(
   session({
