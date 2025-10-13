@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 // product model
 const Product = require("../models/product");
 const Order = require("../models/order");
@@ -10,6 +12,7 @@ exports.listProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Products List",
         path: "/products",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => {
@@ -27,6 +30,7 @@ exports.getHome = (req, res, next) => {
         prods: products,
         pageTitle: "Home",
         path: "/",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => {
@@ -88,11 +92,11 @@ exports.getOrders = (req, res, next) => {
   const isLoggedIn = req.session.isLoggedIn;
   Order.find({ "user.userId": req.user._id })
     .then((orders) => {
-      console.log(orders[0].products);
       res.render("shop/orders", {
         pageTitle: "Orders",
         path: "/orders",
         orders: orders,
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => {
@@ -112,6 +116,7 @@ exports.getProductDetail = (req, res, next) => {
         product: product,
         pageTitle: product.title + " Detail",
         path: "/products",
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => {
@@ -153,4 +158,17 @@ exports.createOrder = (req, res, next) => {
       error.httpStatusCode = 500;
       next(error);
     });
+};
+
+exports.downloadInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  let invoiceName = "invoice-" + orderId + ".pdf";
+
+  const invoicePath = path.join("data", "invoices", invoiceName);
+
+  res.download(invoicePath, function (err) {
+    if (err) {
+      return next(err);
+    }
+  });
 };

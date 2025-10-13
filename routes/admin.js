@@ -20,10 +20,7 @@ router.post(
       .withMessage("Price is required")
       .isFloat()
       .withMessage("please enter a number with 2 decimal places"),
-    body("productImg")
-      .trim()
-      .notEmpty()
-      .withMessage("URL for image is required"),
+
     body("description")
       .trim()
       .isLength({ max: 400 })
@@ -55,10 +52,7 @@ router.post(
       .withMessage("Price is required")
       .isFloat()
       .withMessage("Please enter a number with 2 decimal places"),
-    body("productImg")
-      .trim()
-      .notEmpty()
-      .withMessage("URL for image is required"),
+
     body("description")
       .trim()
       .isLength({ max: 400 })
