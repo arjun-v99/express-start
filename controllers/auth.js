@@ -97,9 +97,17 @@ exports.doLogin = (req, res, next) => {
             validationErrors: mappedErrors,
           });
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          next(error);
+        });
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.doLogout = (req, res, next) => {
@@ -176,7 +184,9 @@ exports.signUp = (req, res, next) => {
         .catch((err) => console.error(err));
     })
     .catch((err) => {
-      console.error(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -241,7 +251,11 @@ exports.postResetPwd = (req, res, next) => {
         );
         res.redirect("/reset-password");
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
+      });
   });
 };
 
@@ -297,6 +311,8 @@ exports.postUpdateNewPwd = (req, res, next) => {
       res.redirect("/login");
     })
     .catch((err) => {
-      console.error(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };

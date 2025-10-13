@@ -47,32 +47,47 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
   }
   User.findById(req.session.user._id)
     .then((user) => {
-      if (user) {
-        //the `user` is a mongoose object so we can perform all mongoose action on req.user
-        req.user = user;
-        next();
+      if (!user) {
+        return next();
       }
+      //the `user` is a mongoose object so we can perform all mongoose action on req.user
+      req.user = user;
+      next();
     })
-    .catch((err) => console.error(err));
-});
-
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 });
 
 app.use("/admin", adminRouter.routes);
 app.use(shopRouter.router);
 app.use(authRoutes.routes);
 
+app.get("/500", errorController.internalServerError);
 // 404 error page
 app.use(errorController.urlNotFound);
+
+app.use((error, req, res, next) => {
+  const isLoggedIn = req.session.isLoggedIn;
+  res.status(500).render("500", {
+    pageTitle: "Internal Server Error",
+    path: "/500",
+    isLoggedIn: isLoggedIn,
+  });
+});
 
 mongoose
   .connect(process.env.MONGODB_URL)
