@@ -27,3 +27,8 @@
   border: 1px solid #00695c;
   color: #00695c;
 }
+
+.order__item-heading {
+  display: flex;
+  justify-content: space-between;
+}
