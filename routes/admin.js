@@ -61,10 +61,10 @@ router.post(
   adminController.postEditProduct
 );
 
-router.post(
-  "/delete-product",
+router.delete(
+  "/product/:productId",
   authMiddleware,
-  adminController.postDeleteProduct
+  adminController.deleteProduct
 );
 
 exports.routes = router;
