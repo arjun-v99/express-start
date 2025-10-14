@@ -1,5 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+
+const PDFDocument = require("pdfkit");
+
 // product model
 const Product = require("../models/product");
 const Order = require("../models/order");
@@ -162,13 +165,57 @@ exports.createOrder = (req, res, next) => {
 
 exports.downloadInvoice = (req, res, next) => {
   const orderId = req.params.orderId;
-  let invoiceName = "invoice-" + orderId + ".pdf";
 
-  const invoicePath = path.join("data", "invoices", invoiceName);
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return next(new Error("Unable to find the order"));
+      }
 
-  res.download(invoicePath, function (err) {
-    if (err) {
-      return next(err);
-    }
-  });
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error("You don't have permission to do this"));
+      }
+
+      let invoiceName = "invoice-" + orderId + ".pdf";
+
+      // const invoicePath = path.join("data", "invoices", invoiceName);
+
+      const invoiceDoc = new PDFDocument();
+      // Set response headers
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="' + invoiceName + '"'
+      );
+      invoiceDoc.pipe(res);
+
+      // Add content to the PDF
+      invoiceDoc
+        .fontSize(24)
+        .text("Invoice", { underline: true, align: "center" });
+      invoiceDoc.moveDown();
+      let totalPrice = 0;
+      order.products.forEach((prodObj) => {
+        totalPrice += prodObj.quantity * prodObj.product.price;
+        invoiceDoc
+          .fontSize(14)
+          .text(
+            prodObj.product.title +
+              " - " +
+              prodObj.quantity +
+              " x " +
+              "$" +
+              prodObj.product.price
+          );
+      });
+      invoiceDoc.moveDown(2);
+      invoiceDoc.fontSize(18).text("Total Price: $" + totalPrice);
+      // Finalize the PDF and end the stream
+      invoiceDoc.end();
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
