@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocument = require("pdfkit");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // product model
 const Product = require("../models/product");
@@ -88,6 +89,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        isLoggedIn: isLoggedIn,
       });
     })
     .catch((err) => {
@@ -246,6 +248,56 @@ exports.downloadInvoice = (req, res, next) => {
       invoiceDoc.fontSize(18).text("Total Price: $" + totalPrice);
       // Finalize the PDF and end the stream
       invoiceDoc.end();
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
+};
+
+exports.getCheckout = (req, res, next) => {
+  let totalAmount = 0;
+  let products;
+  const isLoggedIn = req.session.isLoggedIn;
+  // we are getting the user record and populating productIds with product data
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      products = user.cart.items;
+      products.forEach((prod) => {
+        totalAmount += prod.quantity * prod.productId.price;
+      });
+      return stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card"],
+        line_items: products.map((p) => {
+          return {
+            price_data: {
+              currency: "usd",
+              unit_amount: Math.round(p.productId.price * 100),
+              product_data: {
+                name: p.productId.title,
+                description: p.productId.description,
+              },
+            },
+            quantity: p.quantity,
+          };
+        }),
+        success_url:
+          req.protocol + "://" + req.get("host") + "/checkout/success",
+        cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
+      });
+    })
+    .then((session) => {
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        products: products,
+        isLoggedIn: isLoggedIn,
+        totalAmount: totalAmount,
+        sessionUrl: session.url,
+      });
     })
     .catch((err) => {
       const error = new Error(err);
